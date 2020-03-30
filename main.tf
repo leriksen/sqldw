@@ -23,10 +23,9 @@ locals {
   subscription_id = "40371827-837f-4329-a4c1-1000a8a29725"
   location        = "australiasoutheast"
 
-  aad_admin = "24a210e1-db99-4fe1-a7f8-35d1d3813e26" # me
-  aad_admin_name ="AAD_ADMIN"
+  aad_admin      = "24a210e1-db99-4fe1-a7f8-35d1d3813e26" # me
+  aad_admin_name = "AAD_ADMIN"
 }
-
 
 provider "azurerm" {
   tenant_id       = "${local.tenant_id}"
@@ -56,17 +55,17 @@ module "sqldw" {
   source  = "app.terraform.io/agl-experiment/sqldw/azurerm"
   version = "1.0.0"
 
-  resource_group_name = "${azurerm_resource_group.workspace-rg.name}"
-  location = "${local.location}"
-  tags = "${local.tags}"
-  sql_dw_name = "sql-dw-name"
-  db_name = "db_name"
-  sql_admin_user_name = "dataplat"
-  sql_admin_password = "${random_string.sqldw-password.result}"
-  dwuname = "DW100c"
-  aad_admin_user_id = "${local.aad_admin}"
-  aad_admin_user_name = "${local.aad_admin_name}"
-  azure_tenant_id = "${local.tenant_id}"
+  resource_group_name  = "${azurerm_resource_group.workspace-rg.name}"
+  location             = "${local.location}"
+  tags                 = "${local.tags}"
+  sql_dw_name          = "sql-dw-name"
+  db_name              = "db_name"
+  sql_admin_user_name  = "dataplat"
+  sql_admin_password   = "${random_string.sqldw-password.result}"
+  dwuname              = "DW100c"
+  aad_admin_user_id    = "${local.aad_admin}"
+  aad_admin_user_name  = "${local.aad_admin_name}"
+  azure_tenant_id      = "${local.tenant_id}"
   whitelisted_networks = []
-  whitelisted_subnets = []
+  whitelisted_subnets  = []
 }
