@@ -18,38 +18,55 @@ locals {
     Project        = "OneCodeBase"
   }
 
-  tenant_id = "74f9ac2f-c1d2-412f-8435-6e60efdad5e1"
-  location  = "australiasoutheast"
+  tenant_id       = "74f9ac2f-c1d2-412f-8435-6e60efdad5e1"
+  subscription    = "Staging"
+  subscription_id = "40371827-837f-4329-a4c1-1000a8a29725"
+  location        = "australiasoutheast"
+
+  aad_admin = "24a210e1-db99-4fe1-a7f8-35d1d3813e26" # me
+  aad_admin_name ="AAD_ADMIN"
 }
 
 
 provider "azurerm" {
   tenant_id       = "${local.tenant_id}"
-  subscription_id = "${local.subscription}"
+  subscription_id = "${local.subscription_id}"
   version         = "~> 1.0"
 }
 
 resource "azurerm_resource_group" "workspace-rg" {
   location = "${local.location}"
-  name     = "${local.prefix}-${var.TERRAFORM_WORKSPACE}"
+  name     = "sqldw-rg"
   tags     = "${local.tags}"
 }
 
-# module "sqldw" {
-#   source  = "app.terraform.io/agl-experiment/sqldw/azurerm"
-#   version = "1.0.0"
+provider "random" {
+  version = "~> 2.2"
+}
 
-#   resource_group_name = "${azurerm_resource_group.workspace-rg.name}"
-#   location = "${local.location}"
-#   tags = "${local.tags}"
-#   sql_dw_name = "sql_dw_name"
-#   db_name = "db_name"
-#   sql_admin_user_name = "sql_admin_user_name"
-#   sql_admin_password = "sql_admin_password"
-#   dwuname = "DW100c"
-#   aad_admin_user_id = "aad_admin_user_id"
-#   aad_admin_user_name = "aad_admin_user_name"
-#   azure_tenant_id = "azure_tenant_id"
-#   whitelisted_networks = "whitelisted_networks"
-#   whitelisted_subnets = "whitelisted_subnets"
-# }
+resource "random_string" "sqldw-password" {
+  length           = 16
+  special          = true
+  min_upper        = 3
+  min_numeric      = 3
+  override_special = "@"
+}
+
+module "sqldw" {
+  source  = "app.terraform.io/agl-experiment/sqldw/azurerm"
+  version = "1.0.0"
+
+  resource_group_name = "${azurerm_resource_group.workspace-rg.name}"
+  location = "${local.location}"
+  tags = "${local.tags}"
+  sql_dw_name = "sql-dw-name"
+  db_name = "db_name"
+  sql_admin_user_name = "dataplat"
+  sql_admin_password = "${random_string.sqldw-password.result}"
+  dwuname = "DW100c"
+  aad_admin_user_id = "${local.aad_admin}"
+  aad_admin_user_name = "${local.aad_admin_name}"
+  azure_tenant_id = "${local.tenant_id}"
+  whitelisted_networks = []
+  whitelisted_subnets = []
+}
